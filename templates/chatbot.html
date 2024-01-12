@@ -63,21 +63,49 @@
   </style>
 {% endblock %}
 
+{% block navbar %}
+
+<nav class="navbar navbar-dark bg-primary justify-content-left">
+  {% if user.is_authenticated %}
+    <a class="navbar-brand">Welcome {{ user.username }}</a>
+    
+    <form class="form-inline justify-content-right" action="{% url 'delete' %}" method="post">
+      {% csrf_token %}
+      <button class="btn btn-warning my-2 my-sm-0" type="submit">Clear Chat</button>
+    </form>
+
+    
+    <form class="form-inline justify-content-right" action="{% url 'logout' %}" method="post">
+      {% csrf_token %}
+      <button class="btn btn-danger my-2 my-sm-0" type="input">Logout</button>
+    </form>
+    
+  {% endif %}
+</nav>
+
+{% endblock %}
 
 {% block content %}
 <div class="chat-container">
   <div class="card flex-grow-1">
-    <div class="card-header bg-primary text-white">Chat</div>
+    <!-- <div class="card-header bg-primary text-white">Chat</div>
     {% if user.is_authenticated %}
       <div class="card-header bg-primary text-white">Welcome {{ user.username }} <a href="logout" style="color: red;">Logout</a></div>
-
-      <div class="card-header bg-primary text-red">Clear Chat</div>
+      
+      
+      
+      <div class="card-header bg-primary text-red">
+        <form action="{% url 'delete' %}" method="post">
+          {% csrf_token %}
+          <input type="submit" value="Clear Chat">
+        </form>
+      </div>
 
 
     {% else %}
       <div class="card-header bg-primary text-white"><a href="login" style="color: black;">Login</a></div>
       <div class="card-header bg-primary text-white"><a href="register" style="color: yellow;">Register</a></div>
-    {% endif %}
+    {% endif %} -->
     <div class="card-body messages-box">
       
       <ul class="list-unstyled messages-list">

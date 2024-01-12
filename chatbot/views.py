@@ -1,4 +1,4 @@
-from django.shortcuts import render,redirect
+from django.shortcuts import render,redirect,get_list_or_404, get_object_or_404
 from django.http import JsonResponse
 from  openai import OpenAI
 import os
@@ -8,13 +8,28 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .models import Chat
 from django.utils import timezone
+from django.views.decorators.cache import cache_control
+import backoff
+import openai
+
 
 load_dotenv()
 client = OpenAI(api_key=os.environ.get('OPENAI_API_KEY'))
 
 
+app_name = 'chatbot'
+
+@backoff.on_exception(backoff.expo, openai.RateLimitError)
+def ask_openai_with_backoff(**kwargs):
+    return client.chat.completions.create(
+        **kwargs
+    )
+
+
+
 def ask_openai(message):
 
+    # Legacy Completion 
     # response = client.completions.create(
     #     model="gpt-3.5-turbo-instruct",
     #     prompt=message,
@@ -26,14 +41,12 @@ def ask_openai(message):
 
     # answer = response.choices[0].text.strip()
 
-    response = client.chat.completions.create(
-        model='gpt-3.5-turbo',
+    # GPT3.5 Completion
+    response = ask_openai_with_backoff(model='gpt-3.5-turbo',
         messages=[
             {"role":"system", "content":"You are an helpful assistant"},
             {"role":"user", "content":message},
-
-        ]
-    )
+    ])
 
     answer = response.choices[0].message.content.strip()
     return answer
@@ -41,7 +54,8 @@ def ask_openai(message):
 # Create your views here.
 
 # view for chatbot homepage render view
-@login_required(login_url='login')
+@login_required(login_url='/login')
+@cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def chatbot(request):
     chat_history = Chat.objects.filter(user = request.user)
 
@@ -94,3 +108,21 @@ def register(request):
                 error_message = "Error creating account"
                 return render(request,'register.html',{'error_message':error_message})
     return render(request,'register.html')
+
+
+def delete_chat(request):
+
+    # chats = get_list_or_404(Chat, pk=pk)
+
+    if request.method == 'POST':         # If method is POST,
+        Chat.objects.filter(user =  request.user).delete()
+        # chats.delete()                     # delete the cat.
+        return redirect('/')             # Finally, redirect to the homepage.
+
+    return render(request, 'chatbot.html')
+    # If method is not POST, render the default template.
+    
+
+
+
+
