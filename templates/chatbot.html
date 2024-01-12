@@ -65,20 +65,25 @@
 
 {% block navbar %}
 
-<nav class="navbar navbar-dark bg-primary justify-content-left">
+<nav class="navbar navbar-dark bg-primary p-2">
   {% if user.is_authenticated %}
-    <a class="navbar-brand">Welcome {{ user.username }}</a>
-    
-    <form class="form-inline justify-content-right" action="{% url 'delete' %}" method="post">
-      {% csrf_token %}
-      <button class="btn btn-warning my-2 my-sm-0" type="submit">Clear Chat</button>
-    </form>
+    <a class="navbar-brand p-2">Welcome {{ user.username }}</a>
+    <div class="d-flex flex-row-reverse">
+      
+      <div class="p-2 bd-highlight">
+        <form class="form-inline" action="{% url 'logout' %}" method="post">
+          {% csrf_token %}
+          <button class="btn btn-danger my-2 my-sm-0" type="input">Logout</button>
+        </form>
+      </div>
 
-    
-    <form class="form-inline justify-content-right" action="{% url 'logout' %}" method="post">
-      {% csrf_token %}
-      <button class="btn btn-danger my-2 my-sm-0" type="input">Logout</button>
-    </form>
+      <div class="p-2 bd-highlight">
+        <form class="form-inline" action="{% url 'delete' %}" method="post">
+        {% csrf_token %}
+        <button class="btn btn-warning my-2 my-sm-0" type="submit">Clear Chat</button>
+        </form>
+      </div>
+    </div>
     
   {% endif %}
 </nav>

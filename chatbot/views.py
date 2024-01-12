@@ -57,7 +57,7 @@ def ask_openai(message):
 @login_required(login_url='/login')
 @cache_control(no_cache=True,must_revalidate=True,no_store=True)
 def chatbot(request):
-    chat_history = Chat.objects.filter(user = request.user)
+    chat_history = Chat.objects.filter(user = request.user, is_delete =False)
 
 
     if request.method =='POST':
@@ -115,7 +115,8 @@ def delete_chat(request):
     # chats = get_list_or_404(Chat, pk=pk)
 
     if request.method == 'POST':         # If method is POST,
-        Chat.objects.filter(user =  request.user).delete()
+        # Chat.objects.filter(user =  request.user).delete() #Hard Delete
+        Chat.objects.filter(user =  request.user,is_delete=False).update(is_delete=True) #Soft Delete
         # chats.delete()                     # delete the cat.
         return redirect('/')             # Finally, redirect to the homepage.
 
